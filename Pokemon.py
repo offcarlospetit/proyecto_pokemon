@@ -44,6 +44,10 @@ class Stats:
     SATTK: int
     SPE: int
     EFECTIVIDAD: list()
+    mov: str
+    tipoMov: str
+    power: int
+    categoria: str
 
     def efectividadPorTipo(self, tipoAttak, tipoDef):
         valores = self.EFECTIVIDAD[0]
@@ -55,10 +59,14 @@ class Stats:
         return efectividad
 
     def statCalc(self, base):
-        return ((((base+IV)*2)+(sqrt(EV)/4))*LEVEL/100)+5
+        value = ((((base+IV)*2+((sqrt(EV)/4)))*50)/100)+5
+        return value
 
     def getHp(self):
         return self.HP
+
+    def setHpBattle(self, hp):
+        self.HP = hp
 
     def setHp(self, base):
         hp = ((((base+IV)*2)+(sqrt(EV)/4))*LEVEL/100)+LEVEL + 10
@@ -86,7 +94,7 @@ class Stats:
         self.ATTK = value
 
     def getSattk(self):
-        return self.ATTK
+        return self.SATTK
 
     def setSattk(self, base):
         value = self.statCalc(base)
@@ -105,8 +113,36 @@ class Stats:
     def setEfectividad(self, efectividad):
         self.EFECTIVIDAD = efectividad
 
+    def getPower(self):
+        return self.power
+
+    def setPower(self, power):
+        self.power = power
+
+    def getMov(self):
+        return self.mov
+
+    def setMov(self, mov):
+        self.mov = mov
+
+    def getCategoria(self):
+        return self.categoria
+
+    def setCategoria(self, categoria):
+        self.categoria = categoria
+
+    def getTipoMov(self):
+        return self.tipoMov
+
+    def setTipoMov(self, tipoMov):
+        self.tipoMov = tipoMov
+
     def getStatMov(self, movimiento):
         movimiento_stats = get_move(movimiento)
+        self.setMov(movimiento_stats[0])
+        self.setPower(movimiento_stats[1])
+        self.setTipoMov(movimiento_stats[2])
+        self.setCategoria(movimiento_stats[3])
         return movimiento_stats[1]
 
 
@@ -175,16 +211,16 @@ class Pokemon(Tipo, Movimientos, Stats):
 
     def getModifer(self,  enemigoTipo):
         STAB = 1.2
-        TYPE = self.efectividadPorTipo(self.tipo, enemigoTipo)
-        rand_number = random.randint(0.85, 1)
-        if(enemigoTipo != self.tipo):
+        TYPE = float(self.efectividadPorTipo(self.tipo, enemigoTipo))
+        rand_number = random.uniform(0.85, 1)
+        if(self.tipoMov != self.tipo):
             STAB = 1
         modifier = TYPE * STAB * rand_number * 1
         return modifier
 
-    def calcDamage(self, level, power, a, d):
-        damage = (((((2 * level)/5) + 2) * power *
-                  (a/d) / 50) + 2) * self.getModifer()
+    def calcDamage(self, power, a, d, enemigoTipo):
+        damage = (((((2 * LEVEL)/5) + 2) * power *
+                  (a/d) / 50) + 2) * self.getModifer(enemigoTipo)
         return damage
 
     def imprimirEstadisticas(self):
@@ -195,6 +231,32 @@ class Pokemon(Tipo, Movimientos, Stats):
         print("\t- Ataque especial = ", self.getPuntosAtaqueEspecialBase())
         print("\t- Defensa especial = ", self.getPuntosDefensaEspecialBase())
         print("\t- Velocidad = ", self.getPuntosVelocidadBase())
+
+    def imprimirEstadisticasAvanzadas(self):
+        print(f"El hp al nivel {LEVEL} de {self.nombre} es  ", self.getHp())
+        print(f"El atk al nivel {LEVEL} de {self.nombre} es  ", self.getAttk())
+        print(f"El def al nivel {LEVEL} de {self.nombre} es  ", self.getDef())
+        print(
+            f"El spa al nivel {LEVEL} de {self.nombre} es  ", self.getSattk())
+        print(f"El spd al nivel {LEVEL} de {self.nombre} es  ", self.getSDef())
+        print(f"El spe al nivel {LEVEL} de {self.nombre} es  ", self.getSpe())
+
+    def generateDamage(self, pokemon):
+        print(
+            f"El hp al nivel {LEVEL} de {pokemon.getNombre().capitalize()} es  ", pokemon.getHp())
+        categoria = self.getCategoria()
+        enemigoTipo = pokemon.getTipo()
+        if(categoria == "special"):
+            atak = self.getSattk()
+            deff = pokemon.getSDef()
+        damage = self.calcDamage(self.getPower(), atak, deff, enemigoTipo)
+        hp_rest = pokemon.getHp() - damage
+        pokemon.setHpBattle(hp_rest)
+        print(
+            f"El daño que realizó {pokemon.getNombre().capitalize()} a {self.getNombre().capitalize()} fue de: {damage}")
+        print("\n")
+        print(
+            f"{pokemon.getNombre().capitalize()} quedó con un HP de: {pokemon.getHp()}")
 
     def mostrarMovimientos(self):
         print("\nMovimientos que puede aprender el pokémon: ")
