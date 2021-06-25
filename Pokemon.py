@@ -59,7 +59,7 @@ class Stats:
         return efectividad
 
     def statCalc(self, base):
-        value = ((((base+IV)*2+((sqrt(EV)/4)))*50)/100)+5
+        value = ((((int(base)+IV)*2+((sqrt(EV)/4)))*50)/100)+5
         return value
 
     def getHp(self):
@@ -249,6 +249,9 @@ class Pokemon(Tipo, Movimientos, Stats):
         if(categoria == "special"):
             atak = self.getSattk()
             deff = pokemon.getSDef()
+        else:
+            atak = self.getAttk()
+            deff = pokemon.getDef()
         damage = self.calcDamage(self.getPower(), atak, deff, enemigoTipo)
         hp_rest = pokemon.getHp() - damage
         pokemon.setHpBattle(hp_rest)

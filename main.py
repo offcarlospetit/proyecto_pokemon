@@ -1,18 +1,19 @@
 from Pokemon import Pokemon
-from utils import initLoadData
+from utils import initPokemon, getCsvPokemonData
 
 
 if __name__ == "__main__":
     print("Bienvenido al simulador")
-    pokelist, efectividad = initLoadData()
     cont = True
     selectedPokemon: Pokemon = None
     while cont:
         name = input("Ingrese el nombre del primer Pokémon: ")
-        result = [x for x in pokelist if x.nombre == name]
-        if(len(result) > 0):
-            selectedPokemon = result[0]
+        result = getCsvPokemonData(name)
+        if(result != None):
+            selectedPokemon, efectividad = initPokemon(result)
             cont = False
+        print(
+            f"El Pokemon '{name}' no esta en nuestra data, intenta con otro.")
     print(selectedPokemon)
     print("\n")
     selectedPokemon.setEfectividad(efectividad)
@@ -26,9 +27,9 @@ if __name__ == "__main__":
     cont = True
     while cont:
         conter = input("Ingrese el nombre a atacar Pokémon: ")
-        resultConter = [x for x in pokelist if x.nombre == conter]
-        if(len(result) > 0):
-            conterSelectedPokemon = resultConter[0]
+        resultConter = getCsvPokemonData(conter)
+        if(resultConter != None):
+            conterSelectedPokemon, efectividad = initPokemon(resultConter)
             cont = False
     print(conterSelectedPokemon)
     conterSelectedPokemon.setEfectividad(efectividad)
